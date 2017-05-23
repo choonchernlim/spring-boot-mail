@@ -1,0 +1,9 @@
+# See https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
+
+logging.level:
+  root: WARN
+  com.github.choonchernlim: DEBUG
+
+spring:
+  # To ensure logging messages are consistently shown in color regardless of console type (IntelliJ, Terminal, etc).
+  output.ansi.enabled: ALWAYS
