@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest
 @Service
 class EmailService {
 
+    static final int MAX_KEY_WIDTH = 50
     final JavaMailSender javaMailSender
     final DataExtractor dataExtractor
 
@@ -55,33 +56,33 @@ class EmailService {
         final Map<String, Object> dataMap = requestMap << exceptionMap
     }
 
-    String getText(final Map<String, Object> dataMap, final Integer totalIndentations) {
+    String getText(final Map<String, Object> dataMap, final Integer indent = 0) {
         return dataMap.
                 collect {
-                    String value = it.value instanceof Map ?
-                            getText((Map<String, Object>) it.value, totalIndentations + 1) :
-                            it.value
+                    final String value = it.value instanceof Map ?
+                            '\n' + getText((Map<String, Object>) it.value, indent + 5) :
+                            ': ' + it.value
 
-                    return "${it.key}\n${getIndentations(totalIndentations + 1)}${value}"
+                    return (' ' * indent) + it.key.padRight(MAX_KEY_WIDTH - indent) + value
                 }.
-                join("\n${getIndentations(totalIndentations)}")
-    }
-
-    private String getIndentations(final Integer totalIndentations) {
-        return '\t' * totalIndentations
+                join("\n")
     }
 
     static void main(String[] args) {
         println '###################'
         println new EmailService(null, null).getText(
                 [
-                        'test' : 'value',
-                        'test2': [
-                                'test21': 'value2',
-                                'test23': 'value4'
-                        ]
+                        'key1': 'value1',
+                        'key2': [
+                                'subkey3': 'value3',
+                                'subkey4': [
+                                        'subkey3': 'value3',
+                                        'subkey4': 'value4'
+                                ]
+                        ],
+                        'key3': 'value3'
 
-                ], 1
+                ]
         )
         println '###################'
     }
