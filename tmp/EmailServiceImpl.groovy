@@ -1,13 +1,9 @@
 package com.github.choonchernlim.service
 
-import static com.google.common.base.Preconditions.checkArgument
-import static com.google.common.base.Preconditions.checkNotNull
+import com.github.choonchernlim.springbootmail.core.MailMessage
 import com.google.common.collect.ImmutableMap
 import com.google.common.collect.ImmutableSortedMap
-import edu.mayo.appdev.core.bean.EmailBean
-import edu.mayo.appdev.core.bean.EmailBeanBuilder
 import edu.mayo.appdev.core.service.CurrentUserService
-import edu.mayo.appdev.core.service.EmailService
 import edu.mayo.appdev.core.service.PropertyService
 import org.apache.commons.lang3.StringUtils
 import org.apache.velocity.app.VelocityEngine
@@ -24,12 +20,9 @@ import org.springframework.ui.velocity.VelocityEngineUtils
 
 import javax.mail.internet.MimeMessage
 import javax.servlet.http.HttpServletRequest
-import java.io.PrintWriter
-import java.io.StringWriter
-import java.util.Enumeration
-import java.util.HashMap
-import java.util.Map
-import java.util.Set
+
+import static com.google.common.base.Preconditions.checkArgument
+import static com.google.common.base.Preconditions.checkNotNull
 
 @Service
 class EmailServiceImpl {
@@ -146,7 +139,7 @@ class EmailServiceImpl {
                   final String velocityTemplatePath,
                   final Map<String, Object> velocityModel,
                   final boolean isHTMLText) {
-        sendMail(new EmailBean(
+        sendMail(new MailMessage(
                 subjectPrefix: subjectPrefix,
                 subject: subject,
                 tos: recipientEmails,
@@ -158,7 +151,7 @@ class EmailServiceImpl {
 
 
     @Override
-    void sendMail(final EmailBean emailBean) {
+    void sendMail(final MailMessage emailBean) {
         checkArgument(StringUtils.isNotBlank(emailBean.getFrom()), "from cannot be blank")
         checkArgument(StringUtils.isNotBlank(emailBean.getSubject()), "subject cannot be blank")
         checkArgument(StringUtils.isNotBlank(emailBean.getSubjectPrefix()), "subjectPrefix cannot be blank")
