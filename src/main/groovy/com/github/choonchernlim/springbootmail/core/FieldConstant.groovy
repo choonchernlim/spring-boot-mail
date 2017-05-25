@@ -3,7 +3,7 @@ package com.github.choonchernlim.springbootmail.core
 import groovy.transform.PackageScope
 
 /**
- * Error field labels.
+ * Fields.
  */
 @PackageScope
 final class FieldConstant {

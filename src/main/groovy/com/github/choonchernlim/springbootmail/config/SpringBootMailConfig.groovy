@@ -11,7 +11,6 @@ import java.time.Clock
 @Configuration
 @ComponentScan('com.github.choonchernlim.springbootmail.core')
 class SpringBootMailConfig {
-
     @Bean
     Clock clock() {
         return Clock.systemDefaultZone()

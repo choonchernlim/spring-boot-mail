@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service
 
 @Service
 @PackageScope
+@SuppressWarnings("GrMethodMayBeStatic")
 class TextOutputService {
 
     static final int MAX_KEY_WIDTH = 50

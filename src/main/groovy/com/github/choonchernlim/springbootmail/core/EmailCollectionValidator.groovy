@@ -5,6 +5,9 @@ import org.hibernate.validator.internal.constraintvalidators.hv.EmailValidator
 import javax.validation.ConstraintValidator
 import javax.validation.ConstraintValidatorContext
 
+/**
+ * Validator to validate email values in non-empty collection.
+ */
 class EmailCollectionValidator implements ConstraintValidator<EmailCollection, Collection<String>> {
     final EmailValidator validator = new EmailValidator()
 

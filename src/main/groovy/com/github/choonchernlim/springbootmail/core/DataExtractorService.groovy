@@ -11,6 +11,7 @@ import java.time.format.DateTimeFormatter
 
 @Service
 @PackageScope
+@SuppressWarnings("GrMethodMayBeStatic")
 class DataExtractorService {
     static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern('EEEE, MMMM dd, yyyy hh:mm a')
 
@@ -21,12 +22,23 @@ class DataExtractorService {
         this.clock = clock
     }
 
+    /**
+     * Returns general info.
+     *
+     * @return General info map
+     */
     Map<String, Object> getGeneralInfo() {
         return [
                 (FieldConstant.DATETIME): DATE_TIME_FORMATTER.format(LocalDateTime.now(clock))
         ].asImmutable()
     }
 
+    /**
+     * Returns exception info.
+     *
+     * @param exception Exception
+     * @return Exception map
+     */
     Map<String, Object> getExceptionMap(final Exception exception) {
         assert exception
 
@@ -41,6 +53,12 @@ class DataExtractorService {
         ].asImmutable()
     }
 
+    /**
+     * Returns request specific info.
+     *
+     * @param request Request
+     * @return Request map
+     */
     Map<String, Object> getRequestMap(final HttpServletRequest request) {
         assert request
 
@@ -55,12 +73,24 @@ class DataExtractorService {
         ].asImmutable()
     }
 
+    /**
+     * Returns all request headers.
+     *
+     * @param request Request
+     * @return Request header map
+     */
     private Map<String, String> getRequestHeaderMap(final HttpServletRequest request) {
         return request.headerNames.iterator().
                 collectEntries { [(it): request.getHeader(it)] }.
                 asImmutable()
     }
 
+    /**
+     * Returns all request parameters.
+     *
+     * @param request Request
+     * @return Request parameter map
+     */
     private Map<String, String> getRequestParameterMap(final HttpServletRequest request) {
         return request.parameterNames.iterator().
                 collectEntries { [(it): request.getParameter(it)] }.
