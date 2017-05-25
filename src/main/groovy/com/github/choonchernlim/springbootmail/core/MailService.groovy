@@ -9,21 +9,26 @@ import org.springframework.web.context.request.ServletRequestAttributes
 
 import javax.mail.internet.MimeMessage
 import javax.servlet.http.HttpServletRequest
+import javax.validation.ConstraintViolation
+import javax.validation.Validator
 
 @Service
-class EmailService {
+class MailService {
 
     final JavaMailSender javaMailSender
     final DataExtractorService dataExtractorService
     final TextOutputService messageService
+    final Validator validator
 
     @Autowired
-    EmailService(final JavaMailSender javaMailSender,
-                 final DataExtractorService dataExtractorService,
-                 final TextOutputService messageService) {
+    MailService(final JavaMailSender javaMailSender,
+                final DataExtractorService dataExtractorService,
+                final TextOutputService messageService,
+                final Validator validator) {
         this.javaMailSender = javaMailSender
         this.dataExtractorService = dataExtractorService
         this.messageService = messageService
+        this.validator = validator
     }
 
     void send(final MailMessage mailMessage) {
@@ -53,6 +58,13 @@ class EmailService {
     private void handle(final MailMessage mailMessage,
                         final Exception exception = null,
                         final HttpServletRequest request = null) {
+        final Set<ConstraintViolation<MailMessage>> violations = validator.validate(mailMessage)
+
+        println "Total violations: ${violations.size()}"
+
+        violations.each {
+            println it
+        }
 
         final Map<String, Object> generalInfoMap = dataExtractorService.getGeneralInfo()
         final Map<String, Object> exceptionMap = exception ? dataExtractorService.getExceptionMap(exception) : [:]
@@ -65,7 +77,11 @@ class EmailService {
         MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true)
 
         mimeMessageHelper.from = mailMessage.from
-        mimeMessageHelper.to = mailMessage.tos
+
+        mailMessage.tos.each {
+            mimeMessageHelper.addTo(it)
+        }
+
         mimeMessageHelper.subject = mailMessage.subject
         mimeMessageHelper.setText(text, mailMessage.isHtmlText)
 

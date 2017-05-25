@@ -1,26 +1,28 @@
 package com.github.choonchernlim.springbootmail.core
 
-import org.springframework.mail.javamail.JavaMailSender
+import org.springframework.mail.javamail.JavaMailSenderImpl
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 import spock.lang.Specification
 
+import javax.validation.Validation
 import java.nio.file.attribute.UserPrincipal
 import java.time.Clock
 import java.time.Instant
 import java.time.ZoneId
 
-class EmailServiceSpec extends Specification {
+class MailServiceSpec extends Specification {
 
     def clock = Clock.fixed(Instant.parse('2015-08-04T10:11:00Z'), ZoneId.systemDefault())
 
-    def javaMailSender = Mock JavaMailSender
+    def javaMailSender = new JavaMailSenderImpl()
     def dataExtractorService = new DataExtractorService(clock)
 
     def textOutputService = new TextOutputService()
 
-    def emailService = new EmailService(javaMailSender, dataExtractorService, textOutputService)
+    def validator = Validation.buildDefaultValidatorFactory().validator
+    def mailService = new MailService(javaMailSender, dataExtractorService, textOutputService, validator)
 
     def request = new MockHttpServletRequest()
 
@@ -59,8 +61,11 @@ class EmailServiceSpec extends Specification {
         // @formatter:on
 
         expect:
-        emailService.sendWebException(
-                new MailMessage(text: 'this is a body!', isHtmlText: true),
+        mailService.sendWebException(
+                new MailMessage(text: 'this is a body!',
+                                isHtmlText: true,
+                                from: 'from',
+                                subject: 'subject'), // Subject must not be null
                 new Exception('error'))
     }
 }

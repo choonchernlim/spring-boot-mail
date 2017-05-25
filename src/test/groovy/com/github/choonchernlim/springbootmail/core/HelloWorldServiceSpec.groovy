@@ -26,7 +26,7 @@ class HelloWorldServiceSpec extends Specification {
     }
 
     @Autowired
-    EmailService emailService
+    MailService mailService
 
     def setup() {
         MockHttpServletRequest request = new MockHttpServletRequest()
@@ -35,7 +35,7 @@ class HelloWorldServiceSpec extends Specification {
 
     def "getMessage"() {
         expect:
-        emailService.sendWebException(new MailMessage(text: 'body'), new Exception('test'))
+        mailService.sendWebException(new MailMessage(text: 'body'), new Exception('test'))
 
         true
     }
