@@ -9,6 +9,9 @@ import java.time.Clock
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+/**
+ * This class extracts selected info from the given object and returns them as a map.
+ */
 @Service
 @PackageScope
 @SuppressWarnings("GrMethodMayBeStatic")
@@ -18,7 +21,7 @@ class DataExtractorService {
     final Clock clock
 
     @Autowired
-    DataExtractorService(final Clock clock = Clock.systemDefaultZone()) {
+    DataExtractorService(final Clock clock) {
         this.clock = clock
     }
 
@@ -27,7 +30,7 @@ class DataExtractorService {
      *
      * @return General info map
      */
-    Map<String, Object> getGeneralInfo() {
+    Map<String, Object> getGeneralInfoMap() {
         return [
                 (FieldConstant.DATETIME): DATE_TIME_FORMATTER.format(LocalDateTime.now(clock))
         ].asImmutable()

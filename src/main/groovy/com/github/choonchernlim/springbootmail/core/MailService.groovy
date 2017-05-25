@@ -66,12 +66,12 @@ class MailService {
             println it
         }
 
-        final Map<String, Object> generalInfoMap = dataExtractorService.getGeneralInfo()
+        final Map<String, Object> generalInfoMap = dataExtractorService.getGeneralInfoMap()
         final Map<String, Object> exceptionMap = exception ? dataExtractorService.getExceptionMap(exception) : [:]
         final Map<String, Object> requestMap = request ? dataExtractorService.getRequestMap(request) : [:]
         final Map<String, Object> dataMap = (generalInfoMap + requestMap + exceptionMap).asImmutable()
 
-        final String text = mailBean.text + '\n\n' + textOutputService.getMessage(dataMap, mailBean.isHtmlText)
+        final String text = mailBean.text + '\n\n' + textOutputService.getText(dataMap, mailBean.isHtmlText)
 
         MimeMessage mimeMessage = javaMailSender.createMimeMessage()
         MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true)
