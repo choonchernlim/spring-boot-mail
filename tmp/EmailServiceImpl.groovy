@@ -1,6 +1,6 @@
 package com.github.choonchernlim.service
 
-import com.github.choonchernlim.springbootmail.core.MailMessage
+import com.github.choonchernlim.springbootmail.core.MailBean
 import com.google.common.collect.ImmutableMap
 import com.google.common.collect.ImmutableSortedMap
 import edu.mayo.appdev.core.service.CurrentUserService
@@ -139,7 +139,7 @@ class EmailServiceImpl {
                   final String velocityTemplatePath,
                   final Map<String, Object> velocityModel,
                   final boolean isHTMLText) {
-        sendMail(new MailMessage(
+        sendMail(new MailBean(
                 subjectPrefix: subjectPrefix,
                 subject: subject,
                 tos: recipientEmails,
@@ -151,7 +151,7 @@ class EmailServiceImpl {
 
 
     @Override
-    void sendMail(final MailMessage emailBean) {
+    void sendMail(final MailBean emailBean) {
         checkArgument(StringUtils.isNotBlank(emailBean.getFrom()), "from cannot be blank")
         checkArgument(StringUtils.isNotBlank(emailBean.getSubject()), "subject cannot be blank")
         checkArgument(StringUtils.isNotBlank(emailBean.getSubjectPrefix()), "subjectPrefix cannot be blank")

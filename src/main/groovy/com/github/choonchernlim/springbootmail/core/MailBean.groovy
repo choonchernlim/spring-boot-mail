@@ -9,7 +9,7 @@ import org.springframework.core.io.InputStreamSource
 
 @Builder
 @ToString(includeNames = true)
-class MailMessage {
+class MailBean {
 
     @NotBlank
     @Email

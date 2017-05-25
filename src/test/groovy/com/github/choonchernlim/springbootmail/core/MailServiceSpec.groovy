@@ -62,10 +62,10 @@ class MailServiceSpec extends Specification {
 
         expect:
         mailService.sendWebException(
-                new MailMessage(text: 'this is a body!',
-                                isHtmlText: true,
-                                from: 'from',
-                                subject: 'subject'), // Subject must not be null
+                new MailBean(text: 'this is a body!',
+                             isHtmlText: true,
+                             from: 'from',
+                             subject: 'subject'), // Subject must not be null
                 new Exception('error'))
     }
 }

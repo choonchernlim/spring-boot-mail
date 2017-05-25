@@ -35,7 +35,7 @@ class HelloWorldServiceSpec extends Specification {
 
     def "getMessage"() {
         expect:
-        mailService.sendWebException(new MailMessage(text: 'body'), new Exception('test'))
+        mailService.sendWebException(new MailBean(text: 'body'), new Exception('test'))
 
         true
     }

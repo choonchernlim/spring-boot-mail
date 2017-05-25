@@ -17,48 +17,48 @@ class MailService {
 
     final JavaMailSender javaMailSender
     final DataExtractorService dataExtractorService
-    final TextOutputService messageService
+    final TextOutputService textOutputService
     final Validator validator
 
     @Autowired
     MailService(final JavaMailSender javaMailSender,
                 final DataExtractorService dataExtractorService,
-                final TextOutputService messageService,
+                final TextOutputService textOutputService,
                 final Validator validator) {
         this.javaMailSender = javaMailSender
         this.dataExtractorService = dataExtractorService
-        this.messageService = messageService
+        this.textOutputService = textOutputService
         this.validator = validator
     }
 
-    void send(final MailMessage mailMessage) {
-        assert mailMessage
+    void send(final MailBean mailBean) {
+        assert mailBean
 
-        handle(mailMessage)
+        handle(mailBean)
     }
 
-    void sendException(final MailMessage mailMessage, final Exception exception) {
-        assert mailMessage
+    void sendException(final MailBean mailBean, final Exception exception) {
+        assert mailBean
         assert exception
 
-        handle(mailMessage, exception)
+        handle(mailBean, exception)
     }
 
-    void sendWebException(final MailMessage mailMessage, final Exception exception) {
-        assert mailMessage
+    void sendWebException(final MailBean mailBean, final Exception exception) {
+        assert mailBean
         assert exception
 
         final HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.requestAttributes).request
 
         assert request
 
-        handle(mailMessage, exception, request)
+        handle(mailBean, exception, request)
     }
 
-    private void handle(final MailMessage mailMessage,
+    private void handle(final MailBean mailBean,
                         final Exception exception = null,
                         final HttpServletRequest request = null) {
-        final Set<ConstraintViolation<MailMessage>> violations = validator.validate(mailMessage)
+        final Set<ConstraintViolation<MailBean>> violations = validator.validate(mailBean)
 
         println "Total violations: ${violations.size()}"
 
@@ -71,33 +71,33 @@ class MailService {
         final Map<String, Object> requestMap = request ? dataExtractorService.getRequestMap(request) : [:]
         final Map<String, Object> dataMap = (generalInfoMap + requestMap + exceptionMap).asImmutable()
 
-        final String text = mailMessage.text + '\n\n' + messageService.getMessage(dataMap, mailMessage.isHtmlText)
+        final String text = mailBean.text + '\n\n' + textOutputService.getMessage(dataMap, mailBean.isHtmlText)
 
         MimeMessage mimeMessage = javaMailSender.createMimeMessage()
         MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true)
 
-        mimeMessageHelper.from = mailMessage.from
+        mimeMessageHelper.from = mailBean.from
 
-        mailMessage.tos.each {
+        mailBean.tos.each {
             mimeMessageHelper.addTo(it)
         }
 
-        mimeMessageHelper.subject = mailMessage.subject
-        mimeMessageHelper.setText(text, mailMessage.isHtmlText)
+        mimeMessageHelper.subject = mailBean.subject
+        mimeMessageHelper.setText(text, mailBean.isHtmlText)
 
-        mailMessage.ccs?.each {
+        mailBean.ccs?.each {
             mimeMessageHelper.addCc(it)
         }
 
-        mailMessage.bccs?.each {
+        mailBean.bccs?.each {
             mimeMessageHelper.addBcc(it)
         }
 
-        if (mailMessage.replyTo?.trim()) {
-            mimeMessageHelper.replyTo = mailMessage.replyTo
+        if (mailBean.replyTo?.trim()) {
+            mimeMessageHelper.replyTo = mailBean.replyTo
         }
 
-        mailMessage.attachments?.each {
+        mailBean.attachments?.each {
             mimeMessageHelper.addAttachment(it.key, it.value)
         }
 

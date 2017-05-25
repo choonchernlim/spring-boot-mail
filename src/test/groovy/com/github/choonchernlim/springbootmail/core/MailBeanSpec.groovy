@@ -4,13 +4,13 @@ import spock.lang.Specification
 
 import javax.validation.Validation
 
-class MailMessageSpec extends Specification {
+class MailBeanSpec extends Specification {
 
     def validator = Validation.buildDefaultValidatorFactory().validator
 
     def "test"() {
         given:
-        def mailMessage = MailMessage.builder().
+        def mailBean = MailBean.builder().
                 from('from@github.com').
                 tos(['to@github.com'] as Set).
                 subject('subject').
@@ -18,7 +18,7 @@ class MailMessageSpec extends Specification {
                 build()
 
         when:
-        def errors = validator.validate(mailMessage)
+        def errors = validator.validate(mailBean)
 
         then:
         errors.isEmpty()
