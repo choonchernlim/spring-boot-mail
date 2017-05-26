@@ -1,26 +1,38 @@
 package com.github.choonchernlim.springbootmail.core
 
+import com.icegreen.greenmail.util.GreenMail
+import com.icegreen.greenmail.util.ServerSetup
+import org.springframework.core.io.ByteArrayResource
 import org.springframework.mail.javamail.JavaMailSenderImpl
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 import spock.lang.Specification
+import spock.lang.Unroll
 
+import javax.mail.Address
+import javax.mail.Message.RecipientType
+import javax.mail.Multipart
+import javax.mail.internet.MimeMessage
+import javax.mail.internet.MimeMultipart
+import javax.mail.util.SharedByteArrayInputStream
 import javax.validation.Validation
-import java.nio.file.attribute.UserPrincipal
 import java.time.Clock
 import java.time.Instant
 import java.time.ZoneId
 
 class MailServiceSpec extends Specification {
+    static class ExpectedContent {
+        String content
+        String contentType
+    }
+
+    def smtpServer = new GreenMail(new ServerSetup(65438, 'localhost', 'smtp'))
+    def javaMailSender = new JavaMailSenderImpl(port: 65438, host: 'localhost')
 
     def clock = Clock.fixed(Instant.parse('2015-08-04T10:11:00Z'), ZoneId.systemDefault())
-
-    def javaMailSender = new JavaMailSenderImpl()
     def dataExtractorService = new DataExtractorService(clock)
-
     def textOutputService = new TextOutputService()
-
     def validator = Validation.buildDefaultValidatorFactory().validator
     def mailService = new MailService(javaMailSender, dataExtractorService, textOutputService, validator)
 
@@ -28,44 +40,144 @@ class MailServiceSpec extends Specification {
 
     def setup() {
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request))
+        smtpServer.start()
     }
 
-    def "test"() {
+    def cleanup() {
+        smtpServer.stop()
+    }
+
+    @Unroll
+    def "send - given #label, should throw #expectedException"() {
+        when:
+        mailService.send(mailBean)
+
+        then:
+        thrown expectedException
+
+        where:
+        label          | mailBean       | expectedException
+        'null bean'    | null           | AssertionError
+        'invalid bean' | new MailBean() | MailException
+    }
+
+    @Unroll
+    def "sendException - given #label, should throw #expectedException"() {
+        when:
+        mailService.sendException(mailBean, exception)
+
+        then:
+        thrown expectedException
+
+        where:
+        label            | mailBean       | exception       | expectedException
+        'null bean'      | null           | new Exception() | AssertionError
+        'null exception' | new MailBean() | null            | AssertionError
+        'invalid bean'   | new MailBean() | new Exception() | MailException
+    }
+
+    @Unroll
+    def "sendWebException - given #label, should throw #expectedException"() {
         given:
-        request.userPrincipal = new UserPrincipal() {
-            String getName() {
-                return 'limc'
-            }
+        def requestAttributes = httpServletRequest ? new ServletRequestAttributes(httpServletRequest) : null
+        RequestContextHolder.setRequestAttributes(requestAttributes)
+
+        when:
+        mailService.sendWebException(mailBean, exception)
+
+        then:
+        thrown expectedException
+
+        where:
+        label            | mailBean       | exception       | httpServletRequest           | expectedException
+        'null bean'      | null           | new Exception() | new MockHttpServletRequest() | AssertionError
+        'null exception' | new MailBean() | null            | new MockHttpServletRequest() | AssertionError
+        'null request'   | new MailBean() | new Exception() | null                         | AssertionError
+        'invalid bean'   | new MailBean() | new Exception() | new MockHttpServletRequest() | MailException
+    }
+
+    def "send - given valid mail bean, should send email"() {
+        when:
+        mailService.send(new MailBean(
+                from: 'from@github.com',
+                replyTo: 'replyTo@github.com',
+                tos: ['to@github.com'] as Set,
+                ccs: ['cc@github.com'] as Set,
+                bccs: ['bcc@github.com'] as Set,
+                subject: 'subject',
+                text: 'text',
+                attachments: ['filename.pdf': new ByteArrayResource('file-data'.bytes)]
+        ))
+
+        then:
+        assertMimeMessage(
+                'from@github.com',
+                'replyTo@github.com',
+                ['to@github.com'],
+                ['cc@github.com'],
+                ['bcc@github.com'],
+                'subject',
+                [
+                        new ExpectedContent(content: 'text', contentType: 'text/plain'),
+                        new ExpectedContent(content: 'file-data', contentType: 'application/pdf; name=filename.pdf')
+                ])
+    }
+
+    void assertMimeMessage(String from,
+                           String replyTo,
+                           List<String> tos,
+                           List<String> ccs,
+                           List<String> bccs,
+                           String subject,
+                           List<ExpectedContent> expectedContents) {
+        def messages = smtpServer.getReceivedMessages()
+
+        messages.size() == 1
+
+        def message = messages[0]
+
+        assert getEmails(message.from) == [from]
+        assert getEmails(message.replyTo) == [replyTo]
+        assert getEmails(message, RecipientType.TO) == tos
+        assert getEmails(message, RecipientType.CC) == ccs
+
+        // TODO LIMC ERROR!
+        assert getEmails(message, RecipientType.BCC) == bccs
+        assert message.subject == subject
+
+        def parentPart = (Multipart) message.content
+
+        assert parentPart.count == expectedContents.size()
+
+        expectedContents.eachWithIndex { ExpectedContent expectedContent, int i ->
+            assertContent(parentPart, i, expectedContent.content, expectedContent.contentType)
         }
+    }
 
-        request.addParameter('param1', 'value1')
-        request.addParameter('param2', 'value2')
-        request.addParameter('param3', '')
+    void assertContent(Multipart parentPart, int partIndex, String expectedContent, String expectedContentType) {
+        def bodyPart = parentPart.getBodyPart(partIndex)
+        def content = bodyPart.content
 
-        request.setContent('body'.bytes)
+        if (content instanceof MimeMultipart) {
+            def childBodyPart = ((Multipart) content).getBodyPart(0)
 
-        // @formatter:off
-        request.addHeader('x-xsrf-token','dd4b82fa-a0b3-4d11-afb7-90bfc914b6e1')
-        request.addHeader('Accept- Language','en-US,en;q=0.8')
-        request.addHeader('Cookie','JSESSIONID=78d2rdv6rx3i1pc6j9811cuhv; XSRF-TOKEN=dd4b82fa-a0b3-4d11-afb7-90bfc914b6e1')
-        request.addHeader('Host','localhost:8080')
-        request.addHeader('Content-Length','1103')
-        request.addHeader('origin','https://localhost:8080')
-        request.addHeader('Referer','https://localhost:8080/app')
-        request.addHeader('Accept-Encoding','gzip, deflate, br')
-        request.addHeader('User-Agent','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.98 Safari/537.36')
-        request.addHeader('Connection','close')
-        request.addHeader('Content-Type','application/json')
-        request.addHeader('Accept','*/*')
-        request.addHeader('no-value','')
-        // @formatter:on
+            assert childBodyPart.contentType.contains(expectedContentType)
+            assert childBodyPart.content == expectedContent
+        }
+        else if (content instanceof SharedByteArrayInputStream) {
+            assert bodyPart.contentType.contains(expectedContentType)
+            assert ((SharedByteArrayInputStream) content).text == expectedContent
+        }
+        else {
+            assert false
+        }
+    }
 
-        expect:
-        mailService.sendWebException(
-                new MailBean(text: 'this is a body!',
-                             isHtmlText: true,
-                             from: 'from',
-                             subject: 'subject'), // Subject must not be null
-                new Exception('error'))
+    def getEmails(MimeMessage mimeMessage, RecipientType recipientType) {
+        return getEmails(mimeMessage.getRecipients(recipientType))
+    }
+
+    def getEmails(Address[] addresses) {
+        return addresses.collect { it.toString() }
     }
 }

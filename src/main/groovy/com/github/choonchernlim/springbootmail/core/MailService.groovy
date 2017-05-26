@@ -68,7 +68,7 @@ class MailService {
         assert mailBean
         assert exception
 
-        final HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.requestAttributes).request
+        final HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.requestAttributes)?.request
 
         assert request
 
@@ -142,11 +142,13 @@ class MailService {
      * @return Email message
      */
     private String getText(Exception exception, HttpServletRequest request, String userText, boolean isHtmlText) {
-        final Map<String, Object> exceptionMap = exception ? dataExtractorService.getExceptionMap(exception) : [:]
-        final Map<String, Object> requestMap = request ? dataExtractorService.getRequestMap(request) : [:]
+        if (!exception) {
+            return userText
+        }
 
-        // only get general info if exception has occurred
-        final Map<String, Object> generalInfoMap = exception ? dataExtractorService.getGeneralInfoMap() : [:]
+        final Map<String, Object> generalInfoMap = dataExtractorService.getGeneralInfoMap()
+        final Map<String, Object> exceptionMap = dataExtractorService.getExceptionMap(exception)
+        final Map<String, Object> requestMap = request ? dataExtractorService.getRequestMap(request) : [:]
 
         final Map<String, Object> dataMap = (generalInfoMap + requestMap + exceptionMap).asImmutable()
 
