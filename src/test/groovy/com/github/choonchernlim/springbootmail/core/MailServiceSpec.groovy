@@ -2,7 +2,6 @@ package com.github.choonchernlim.springbootmail.core
 
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.mail.javamail.JavaMailSenderImpl
-import org.springframework.mail.javamail.SmartMimeMessage
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
@@ -14,7 +13,6 @@ import javax.mail.Message.RecipientType
 import javax.mail.Multipart
 import javax.mail.internet.MimeMessage
 import javax.mail.internet.MimeMultipart
-import javax.mail.util.SharedByteArrayInputStream
 import javax.validation.Validation
 import java.time.Clock
 import java.time.Instant
@@ -27,18 +25,11 @@ class MailServiceSpec extends Specification {
         String fileName
     }
 
-//    def smtpServer = new GreenMail(new ServerSetup(65438, 'localhost', 'smtp'))
-//    def javaMailSender = new JavaMailSenderImpl(port: 65438, host: 'localhost')
-
     def javaMailSender = new JavaMailSenderImpl() {
         MimeMessage mimeMessage
 
         void send(final MimeMessage mimeMessage) throws org.springframework.mail.MailException {
             this.mimeMessage = mimeMessage
-        }
-
-        MimeMessage getSentMimeMessage() {
-            return mimeMessage
         }
     }
 
@@ -140,7 +131,7 @@ class MailServiceSpec extends Specification {
                            List<String> bccs,
                            String subject,
                            List<ExpectedContent> expectedContents) {
-        def message = javaMailSender.getSentMimeMessage()
+        def message = javaMailSender.mimeMessage
 
         assert getEmails(message.from) == [from]
         assert getEmails(message.replyTo) == [replyTo]
