@@ -1,9 +1,8 @@
 package com.github.choonchernlim.springbootmail.core
 
-import com.icegreen.greenmail.util.GreenMail
-import com.icegreen.greenmail.util.ServerSetup
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.mail.javamail.JavaMailSenderImpl
+import org.springframework.mail.javamail.SmartMimeMessage
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
@@ -25,10 +24,23 @@ class MailServiceSpec extends Specification {
     static class ExpectedContent {
         String content
         String contentType
+        String fileName
     }
 
-    def smtpServer = new GreenMail(new ServerSetup(65438, 'localhost', 'smtp'))
-    def javaMailSender = new JavaMailSenderImpl(port: 65438, host: 'localhost')
+//    def smtpServer = new GreenMail(new ServerSetup(65438, 'localhost', 'smtp'))
+//    def javaMailSender = new JavaMailSenderImpl(port: 65438, host: 'localhost')
+
+    def javaMailSender = new JavaMailSenderImpl() {
+        MimeMessage mimeMessage
+
+        void send(final MimeMessage mimeMessage) throws org.springframework.mail.MailException {
+            this.mimeMessage = mimeMessage
+        }
+
+        MimeMessage getSentMimeMessage() {
+            return mimeMessage
+        }
+    }
 
     def clock = Clock.fixed(Instant.parse('2015-08-04T10:11:00Z'), ZoneId.systemDefault())
     def dataExtractorService = new DataExtractorService(clock)
@@ -40,11 +52,6 @@ class MailServiceSpec extends Specification {
 
     def setup() {
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request))
-        smtpServer.start()
-    }
-
-    def cleanup() {
-        smtpServer.stop()
     }
 
     @Unroll
@@ -106,7 +113,10 @@ class MailServiceSpec extends Specification {
                 bccs: ['bcc@github.com'] as Set,
                 subject: 'subject',
                 text: 'text',
-                attachments: ['filename.pdf': new ByteArrayResource('file-data'.bytes)]
+                attachments: [
+                        'file.pdf': new ByteArrayResource('file-pdf'.bytes),
+                        'file.doc': new ByteArrayResource('file-doc'.bytes)
+                ]
         ))
 
         then:
@@ -117,9 +127,9 @@ class MailServiceSpec extends Specification {
                 ['cc@github.com'],
                 ['bcc@github.com'],
                 'subject',
-                [
-                        new ExpectedContent(content: 'text', contentType: 'text/plain'),
-                        new ExpectedContent(content: 'file-data', contentType: 'application/pdf; name=filename.pdf')
+                [new ExpectedContent(content: 'text', contentType: 'text/plain'),
+                 new ExpectedContent(content: 'file-pdf', contentType: 'application/pdf', fileName: 'file.pdf'),
+                 new ExpectedContent(content: 'file-doc', contentType: 'application/msword', fileName: 'file.doc')
                 ])
     }
 
@@ -130,18 +140,12 @@ class MailServiceSpec extends Specification {
                            List<String> bccs,
                            String subject,
                            List<ExpectedContent> expectedContents) {
-        def messages = smtpServer.getReceivedMessages()
-
-        messages.size() == 1
-
-        def message = messages[0]
+        def message = javaMailSender.getSentMimeMessage()
 
         assert getEmails(message.from) == [from]
         assert getEmails(message.replyTo) == [replyTo]
         assert getEmails(message, RecipientType.TO) == tos
         assert getEmails(message, RecipientType.CC) == ccs
-
-        // TODO LIMC ERROR!
         assert getEmails(message, RecipientType.BCC) == bccs
         assert message.subject == subject
 
@@ -150,26 +154,33 @@ class MailServiceSpec extends Specification {
         assert parentPart.count == expectedContents.size()
 
         expectedContents.eachWithIndex { ExpectedContent expectedContent, int i ->
-            assertContent(parentPart, i, expectedContent.content, expectedContent.contentType)
+            assertContent(parentPart, i, expectedContent)
         }
     }
 
-    void assertContent(Multipart parentPart, int partIndex, String expectedContent, String expectedContentType) {
+    void assertContent(Multipart parentPart, int partIndex, ExpectedContent expectedContent) {
         def bodyPart = parentPart.getBodyPart(partIndex)
         def content = bodyPart.content
 
+        // non-attachment
         if (content instanceof MimeMultipart) {
+            assert bodyPart.disposition == null
+            assert bodyPart.dataHandler.name == expectedContent.fileName
+
             def childBodyPart = ((Multipart) content).getBodyPart(0)
 
-            assert childBodyPart.contentType.contains(expectedContentType)
-            assert childBodyPart.content == expectedContent
+            assert childBodyPart.contentType.contains(expectedContent.contentType)
+            assert childBodyPart.content == expectedContent.content
         }
-        else if (content instanceof SharedByteArrayInputStream) {
-            assert bodyPart.contentType.contains(expectedContentType)
-            assert ((SharedByteArrayInputStream) content).text == expectedContent
+        // attachment
+        else if (content instanceof ByteArrayInputStream) {
+            assert bodyPart.disposition == 'attachment'
+            assert bodyPart.dataHandler.contentType == expectedContent.contentType
+            assert bodyPart.dataHandler.name == expectedContent.fileName
+            assert ((ByteArrayInputStream) content).text == expectedContent.content
         }
         else {
-            assert false
+            assert false: "${content.class} not handled"
         }
     }
 
