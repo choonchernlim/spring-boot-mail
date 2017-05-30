@@ -1,20 +1,20 @@
-package com.github.choonchernlim.springbootmail.core
+package com.github.choonchernlim.springbootmail.config
 
-import com.github.choonchernlim.springbootmail.config.SpringBootMailConfig
+import com.github.choonchernlim.springbootmail.core.MailService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.JavaMailSenderImpl
-import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.test.context.ContextConfiguration
-import org.springframework.web.context.request.RequestContextHolder
-import org.springframework.web.context.request.ServletRequestAttributes
 import spock.lang.Specification
 
+import javax.validation.Validator
+import java.time.Clock
+
 @ContextConfiguration
-class HelloWorldServiceSpec extends Specification {
+class SpringBootMailConfigSpec extends Specification {
 
     @Configuration
     @Import(SpringBootMailConfig)
@@ -28,15 +28,16 @@ class HelloWorldServiceSpec extends Specification {
     @Autowired
     MailService mailService
 
-    def setup() {
-        MockHttpServletRequest request = new MockHttpServletRequest()
-        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request))
-    }
+    @Autowired
+    Clock clock
 
-    def "getMessage"() {
+    @Autowired
+    Validator validator
+
+    def "given config, should autowire everything properly"() {
         expect:
-        mailService.sendWebException(new MailBean(text: 'body'), new Exception('test'))
-
-        true
+        mailService
+        clock
+        validator
     }
 }

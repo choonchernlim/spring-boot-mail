@@ -71,9 +71,18 @@ class DataExtractorService {
                 (FieldConstant.REQUEST_REMOTE_ADDRESS): request.remoteAddr,
                 (FieldConstant.REQUEST_URL)           : request.requestURL.toString(),
                 (FieldConstant.REQUEST_PARAMETERS)    : getRequestParameterMap(request),
-                (FieldConstant.REQUEST_BODY)          : request.reader.text,
+                (FieldConstant.REQUEST_BODY)          : getRequestBody(request),
                 (FieldConstant.REQUEST_HEADERS)       : getRequestHeaderMap(request)
         ].asImmutable()
+    }
+
+    private String getRequestBody(final HttpServletRequest request) {
+        try {
+            return request.reader.text
+        }
+        catch (Exception ignored) {
+            return null
+        }
     }
 
     /**

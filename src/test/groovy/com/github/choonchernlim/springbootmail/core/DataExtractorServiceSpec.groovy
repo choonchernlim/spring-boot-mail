@@ -96,7 +96,7 @@ class DataExtractorServiceSpec extends Specification {
                 (FieldConstant.REQUEST_REMOTE_ADDRESS): '127.0.0.1',
                 (FieldConstant.REQUEST_URL)           : 'http://localhost',
                 (FieldConstant.REQUEST_PARAMETERS)    : [:],
-                (FieldConstant.REQUEST_BODY)          : '',
+                (FieldConstant.REQUEST_BODY)          : null,
                 (FieldConstant.REQUEST_HEADERS)       : [:]
         ]
     }
