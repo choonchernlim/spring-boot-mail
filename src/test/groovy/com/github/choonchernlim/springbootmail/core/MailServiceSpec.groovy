@@ -94,7 +94,7 @@ class MailServiceSpec extends Specification {
         'invalid bean'   | new MailBean() | new Exception() | new MockHttpServletRequest() | MailException
     }
 
-    def "send - given valid mail bean, should send email"() {
+    def "send - given mail bean with all valid fields, should send email"() {
         when:
         mailService.send(new MailBean(
                 from: 'from@github.com',
@@ -122,6 +122,26 @@ class MailServiceSpec extends Specification {
                  new ExpectedContent(content: 'file-pdf', contentType: 'application/pdf', fileName: 'file.pdf'),
                  new ExpectedContent(content: 'file-doc', contentType: 'application/msword', fileName: 'file.doc')
                 ])
+    }
+
+    def "send - given mail bean with only valid fields, should send email"() {
+        when:
+        mailService.send(new MailBean(
+                from: 'from@github.com',
+                tos: ['to@github.com'] as Set,
+                subject: 'subject',
+                text: 'text'
+        ))
+
+        then:
+        assertMimeMessage(
+                'from@github.com',
+                'from@github.com',
+                ['to@github.com'],
+                [],
+                [],
+                'subject',
+                [new ExpectedContent(content: 'text', contentType: 'text/plain')])
     }
 
     void assertMimeMessage(String from,
