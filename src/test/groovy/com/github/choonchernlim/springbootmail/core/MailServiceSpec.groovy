@@ -30,6 +30,10 @@ class MailServiceSpec extends Specification {
 
         void send(final MimeMessage mimeMessage) throws org.springframework.mail.MailException {
             this.mimeMessage = mimeMessage
+
+            if (mimeMessage.subject == 'force exception') {
+                throw new Exception('force exception')
+            }
         }
     }
 
@@ -142,6 +146,19 @@ class MailServiceSpec extends Specification {
                 [],
                 'subject',
                 [new ExpectedContent(content: 'text', contentType: 'text/plain')])
+    }
+
+    def "send - given unexpected error when sending mail, should throw exception"() {
+        when:
+        mailService.send(new MailBean(
+                from: 'from@github.com',
+                tos: ['to@github.com'] as Set,
+                subject: 'force exception',
+                text: 'text'
+        ))
+
+        then:
+        thrown MailException
     }
 
 
