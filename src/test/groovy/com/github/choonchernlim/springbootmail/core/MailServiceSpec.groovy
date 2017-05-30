@@ -144,6 +144,61 @@ class MailServiceSpec extends Specification {
                 [new ExpectedContent(content: 'text', contentType: 'text/plain')])
     }
 
+
+    def "sendException - given mail bean with exception, should have text with user text and exception"() {
+        when:
+        mailService.sendException(
+                new MailBean(
+                        from: 'from@github.com',
+                        tos: ['to@github.com'] as Set,
+                        subject: 'subject',
+                        text: 'my message'
+                ),
+                new Exception('my exception'))
+
+        then:
+
+        def text = getText()
+
+        text.startsWith('my message')
+        text.contains('my exception')
+        text.contains(FieldConstant.DATETIME)
+        text.contains(FieldConstant.EXCEPTION)
+        !text.contains(FieldConstant.REQUEST_USER_ID)
+    }
+
+    def "sendWebException - given mail bean with exception, should have text with user text, exception and request"() {
+        when:
+        mailService.sendWebException(
+                new MailBean(
+                        from: 'from@github.com',
+                        tos: ['to@github.com'] as Set,
+                        subject: 'subject',
+                        text: 'my message'
+                ),
+                new Exception('my exception'))
+
+        then:
+
+        def text = getText()
+
+        text.startsWith('my message')
+        text.contains('my exception')
+        text.contains(FieldConstant.DATETIME)
+        text.contains(FieldConstant.EXCEPTION)
+        text.contains(FieldConstant.REQUEST_USER_ID)
+    }
+
+    String getText() {
+        def message = javaMailSender.mimeMessage
+        def parentPart = (Multipart) message.content
+        def bodyPart = parentPart.getBodyPart(0)
+        def content = bodyPart.content
+        def childBodyPart = ((Multipart) content).getBodyPart(0)
+
+        return childBodyPart.content
+    }
+
     void assertMimeMessage(String from,
                            String replyTo,
                            List<String> tos,
