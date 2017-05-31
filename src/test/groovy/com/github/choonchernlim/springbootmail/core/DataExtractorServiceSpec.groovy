@@ -11,7 +11,7 @@ import java.time.ZoneId
 
 class DataExtractorServiceSpec extends Specification {
 
-    def clock = Clock.fixed(Instant.parse('2015-08-04T10:11:00Z'), ZoneId.systemDefault())
+    def clock = Clock.fixed(Instant.parse('2015-08-04T10:11:00Z'), ZoneId.of('UTC'))
 
     def service = new DataExtractorService(clock)
 
@@ -33,7 +33,7 @@ class DataExtractorServiceSpec extends Specification {
 
         then:
         map == [
-                (FieldConstant.DATETIME): 'Tuesday, August 04, 2015 05:11 AM'
+                (FieldConstant.DATETIME): 'Tuesday, August 04, 2015 10:11 AM'
         ]
     }
 
