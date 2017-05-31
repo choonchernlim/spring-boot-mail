@@ -10,7 +10,7 @@ import org.springframework.core.io.InputStreamSource
 /**
  * All information regarding the email to be sent.
  */
-@Builder
+@Builder(builderClassName = 'MailBeanBuilder')
 @ToString(includeNames = true)
 class MailBean {
     /**
