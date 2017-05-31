@@ -52,20 +52,24 @@ Spring Boot automatically supplies `JavaMailSender` if any `spring.mail` namespa
 
 Typically, all you need is to specify your institution's SMTP hostname:-
 
-    spring.mail.host: [YOUR_SMTP_HOST]
+```yml
+spring.mail.host: [YOUR_SMTP_HOST]
+```
 
 ... or, if you are using Google Mail:-
 
-    spring.mail:
-      host: smtp.gmail.com
-      username: [YOUR_EMAIL]@gmail.com
-      password: [YOUR_PASSWORD]
-      properties.mail.smtp:
-        auth: true
-        socketFactory:
-          port: 465
-          class: javax.net.ssl.SSLSocketFactory
-          fallback: false
+```yml
+spring.mail:
+  host: smtp.gmail.com
+  username: [YOUR_EMAIL]@gmail.com
+  password: [YOUR_PASSWORD]
+  properties.mail.smtp:
+    auth: true
+    socketFactory:
+      port: 465
+      class: javax.net.ssl.SSLSocketFactory
+      fallback: false
+```
 
 ... but to get it working properly using Google Mail, go to https://myaccount.google.com/secureaccount first and set "Allow less secure apps" to "ON".
 
@@ -73,36 +77,42 @@ Typically, all you need is to specify your institution's SMTP hostname:-
 
 Create a Spring Configuration that imports `SpringBootMailConfig`:-
 
-    @Configuration
-    @Import(SpringBootMailConfig)
-    class AppConfig {
-    }
+```groovy
+@Configuration
+@Import(SpringBootMailConfig)
+class AppConfig {
+}
+```
 
 ### Without Spring Boot
 
 Besides importing `SpringBootMailConfig`, you also have to supply `JavaMailSender` with all the mail properties:-
 
-    @Configuration
-    @Import(SpringBootMailConfig)
-    class AppConfig {
-        @Bean
-        JavaMailSender javaMailSender() {
-            new JavaMailSenderImpl(
-                    host: [YOUR_SMTP_HOST]
-            )
-        }
+```groovy
+@Configuration
+@Import(SpringBootMailConfig)
+class AppConfig {
+    @Bean
+    JavaMailSender javaMailSender() {
+        new JavaMailSenderImpl(
+                host: [YOUR_SMTP_HOST]
+        )
     }
+}
+```
 
 ### Sending Mail
 
 At the simplest level, this is all you need to send an email:-
 
-    @Autowired
-    MailService mailService
-    
-    mailService.send(MailBean.builder().
-                         from('from@github.com').
-                         tos(['to@github.com'] as Set).
-                         subject('subject').
-                         text('text').
-                         build())
+```groovy
+@Autowired
+MailService mailService
+
+mailService.send(MailBean.builder().
+                     from('from@github.com').
+                     tos(['to@github.com'] as Set).
+                     subject('subject').
+                     text('text').
+                     build())
+```
