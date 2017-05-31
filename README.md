@@ -22,7 +22,7 @@ This will be the last email service I will ever write in my whole lifetime.
 |Property                  |Required? |Description                                                                                                         |
 |--------------------------|----------|--------------------------------------------------------------------------------------------------------------------|
 |from                      |Yes       |Sender email.                                                                                                       |
-|tos                       |Yes       |Main recipient email(s).                                                                                            |
+|tos                       |Yes       |Recipient email(s).                                                                                            |
 |subject                   |Yes       |Subject line.                                                                                                       |
 |text                      |Yes       |Email message.                                                                                                      |
 |replyTo                   |No        |Email for user to reply to. <br/><br/>Default is value from `from` property.                                        |
