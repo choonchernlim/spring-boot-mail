@@ -1,4 +1,4 @@
-# spring-boot-mail [![Build Status](https://travis-ci.org/choonchernlim/spring-boot-mail.svg?branch=master)](https://travis-ci.org/choonchernlim/spring-boot-mail)
+# spring-boot-mail [![Build Status](https://travis-ci.org/choonchernlim/spring-boot-mail.svg?branch=master)](https://travis-ci.org/choonchernlim/spring-boot-mail) [![codecov](https://codecov.io/gh/choonchernlim/spring-boot-mail/branch/master/graph/badge.svg)](https://codecov.io/gh/choonchernlim/spring-boot-mail)
 
 Email module for sending emails.
  
