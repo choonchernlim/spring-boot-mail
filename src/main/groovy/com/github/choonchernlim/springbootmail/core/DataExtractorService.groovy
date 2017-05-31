@@ -76,9 +76,15 @@ class DataExtractorService {
         ].asImmutable()
     }
 
+    /**
+     * Returns request body.
+     *
+     * @param request Request
+     * @return Request body if exist, otherwise null
+     */
     private String getRequestBody(final HttpServletRequest request) {
         try {
-            return request.reader.text
+            return request.reader.text ?: null
         }
         catch (Exception ignored) {
             return null
