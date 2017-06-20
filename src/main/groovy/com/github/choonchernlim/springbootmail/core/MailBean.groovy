@@ -1,5 +1,6 @@
 package com.github.choonchernlim.springbootmail.core
 
+import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import groovy.transform.builder.Builder
 import org.hibernate.validator.constraints.Email
@@ -11,6 +12,7 @@ import org.springframework.core.io.InputStreamSource
  * All information regarding the email to be sent.
  */
 @Builder(builderClassName = 'MailBeanBuilder')
+@EqualsAndHashCode
 @ToString(includeNames = true)
 class MailBean {
     /**
