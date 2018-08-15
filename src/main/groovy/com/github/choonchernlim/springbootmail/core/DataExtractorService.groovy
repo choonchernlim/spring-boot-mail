@@ -69,6 +69,7 @@ class DataExtractorService {
                 (FieldConstant.REQUEST_USER_ID)       : request.userPrincipal?.name,
                 (FieldConstant.REQUEST_USER_HOST_NAME): request.remoteHost,
                 (FieldConstant.REQUEST_REMOTE_ADDRESS): request.remoteAddr,
+                (FieldConstant.REQUEST_METHOD)        : request.method,
                 (FieldConstant.REQUEST_URL)           : request.requestURL.toString(),
                 (FieldConstant.REQUEST_PARAMETERS)    : getRequestParameterMap(request),
                 (FieldConstant.REQUEST_BODY)          : getRequestBody(request),
