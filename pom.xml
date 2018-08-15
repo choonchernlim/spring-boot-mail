@@ -6,12 +6,23 @@
     <parent>
         <groupId>com.github.choonchernlim</groupId>
         <artifactId>spring-boot-ci</artifactId>
-        <version>0.2.1</version>
+        <version>0.3.1</version>
+        <relativePath/>
     </parent>
 
     <groupId>com.github.choonchernlim</groupId>
     <artifactId>spring-boot-mail</artifactId>
-    <version>0.1.1</version>
+    <version>0.1.2</version>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.spockframework</groupId>
+                <artifactId>spock-spring</artifactId>
+                <version>${spock.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <!-- Scope: Compile -->

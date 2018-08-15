@@ -7,7 +7,7 @@ import spock.lang.Unroll
 
 class EmailCollectionValidatorSpec extends Specification {
 
-    def context = new ConstraintValidatorContextImpl(null, null, PathImpl.createRootPath(), null)
+    def context = new ConstraintValidatorContextImpl(null, null, PathImpl.createRootPath(), null, null)
     def validator = new EmailCollectionValidator()
 
     @Unroll
