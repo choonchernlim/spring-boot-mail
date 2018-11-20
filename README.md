@@ -13,7 +13,7 @@ This will be the last email service I will ever write in my whole lifetime.
 <dependency>
     <groupId>com.github.choonchernlim</groupId>
     <artifactId>spring-boot-mail</artifactId>
-    <version>0.1.2</version>
+    <version>0.1.3</version>
 </dependency>
 ```
 

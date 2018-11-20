@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.1.3 - 2018-11-20
+
+* REFACTOR - `MailService.getText(..)` - Changed modifier from `private` to `public`.
+
 ## 0.1.2 - 2018-08-15
 
 * FEATURE - Added `Method` value in exception email report.
