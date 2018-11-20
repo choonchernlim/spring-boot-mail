@@ -141,7 +141,10 @@ class MailService {
      * @param isHtmlText Whether it is HTML or plain text
      * @return Email message
      */
-    private String getText(Exception exception, HttpServletRequest request, String userText, boolean isHtmlText) {
+    String getText(final Exception exception,
+                   final HttpServletRequest request,
+                   final String userText,
+                   final boolean isHtmlText) {
         if (!exception) {
             return userText
         }
@@ -151,7 +154,10 @@ class MailService {
         final Map<String, Object> requestMap = request ? dataExtractorService.getRequestMap(request) : [:]
 
         final Map<String, Object> dataMap = (generalInfoMap + requestMap + exceptionMap).asImmutable()
+        final String generatedText = textOutputService.getText(dataMap, isHtmlText)
 
-        return userText + '\n\n' + textOutputService.getText(dataMap, isHtmlText)
+        return userText?.trim() ?
+                userText + '\n\n' + generatedText :
+                generatedText
     }
 }
