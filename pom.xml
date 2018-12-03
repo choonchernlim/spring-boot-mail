@@ -6,29 +6,19 @@
     <parent>
         <groupId>com.github.choonchernlim</groupId>
         <artifactId>spring-boot-ci</artifactId>
-        <version>0.3.2</version>
+        <version>0.4.0-SNAPSHOT</version>
         <relativePath/>
     </parent>
 
     <groupId>com.github.choonchernlim</groupId>
     <artifactId>spring-boot-mail</artifactId>
-    <version>0.1.3</version>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.spockframework</groupId>
-                <artifactId>spock-spring</artifactId>
-                <version>${spock.version}</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+    <version>0.1.4-SNAPSHOT</version>
 
     <dependencies>
         <!-- Scope: Compile -->
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-all</artifactId>
+            <artifactId>groovy</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
