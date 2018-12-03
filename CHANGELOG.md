@@ -1,6 +1,6 @@
 # Change Log
 
-## 0.1.4 - 2018-X-X
+## 0.1.4 - 2018-12-03
 
 * With Spring Boot 2.1.1, instead of using `groovy-all`, use `groovy` instead. 
 
