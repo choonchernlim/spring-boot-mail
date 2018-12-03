@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.1.4 - 2018-12-03
+
+* With Spring Boot 2.1.1, instead of using `groovy-all`, use `groovy` instead. 
+
 ## 0.1.3 - 2018-11-20
 
 * REFACTOR - `MailService.getText(..)` - Changed modifier from `private` to `public`.
